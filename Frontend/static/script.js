@@ -88,7 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
             lista.innerHTML = registros.map((r, i) => `
                 <div class="registro-item">
                     <strong>${i + 1}.</strong> Fecha: ${r.fecha} | Serie: ${r.serie}<br>
-                    Ticket: ${r.ticket || 'N/A'} | Nombre: ${r.nombre} | Cédula: ${r.cedula || 'N/A'} | Empresa: ${r.empresa}
+                    ${r.ticket ? `Ticket: ${r.ticket} | ` : ''}
+                    Nombre: ${r.nombre} | Cédula: ${r.cedula || 'No ingresada'} | Empresa: ${r.empresa}
                 </div>
             `).join('');
         } catch (error) {
