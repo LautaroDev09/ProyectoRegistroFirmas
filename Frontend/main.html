@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Entrega de Activos</title>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <img src="/static/LogoSabat.jpg" alt="Logo Sabat" class="logo-image" />
+    </div>
+
+    <h2>Registro de Entrega de Activos</h2>
+
+    <form id="registroForm">
+      <label for="fecha">Fecha de Retiro:</label>
+      <input type="date" id="fecha" required />
+
+      <label for="serie">Número de Serie:</label>
+      <input type="text" id="serie" required />
+
+      <label for="nombre">Nombre de quien retira:</label>
+      <input type="text" id="nombre" required />
+
+      <!-- ✅ NUEVO CAMPO CÉDULA -->
+      <label for="cedula">Cédula:</label>
+      <input type="text" id="cedula" required />
+
+      <label for="empresa">Empresa Cliente:</label>
+      <input type="text" id="empresa" required />
+
+      <label>Firma de quien retira:</label>
+      <canvas id="signature-pad"></canvas>
+      <button type="button" onclick="clearSignature()">Limpiar Firma</button>
+
+      <div class="error" id="errorMensaje"></div>
+    </form>
+
+    <div class="button-group">
+      <button onclick="validarFormulario()">Listo</button>
+      <button id="btnDescargar" onclick="generarPDF()" disabled>Descargar PDF</button>
+    </div>
+
+    <div id="registrosRecientes">
+      <h3>Últimos 5 registros</h3>
+      <div id="listaRegistros"></div>
+    </div>
+  </div>
+
+  <!-- ✅ Cargar scripts al final para asegurar orden correcto -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js"></script>
+  <script src="/static/script.js"></script>
+</body>
+</html>
