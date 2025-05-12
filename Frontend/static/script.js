@@ -1,7 +1,5 @@
-// script.js - Lógica para el sistema de registros de firmas
 document.addEventListener('DOMContentLoaded', () => {
     const { jsPDF } = window.jspdf;
-
     const canvas = document.getElementById('signature-pad');
     const signaturePad = new SignaturePad(canvas, {
         backgroundColor: 'rgb(255, 255, 255)',
@@ -30,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.validarFormulario = () => {
-        const requiredFields = ['fecha', 'serie', 'nombre', 'cedula', 'empresa'];
+        const requiredFields = ['fecha', 'serie', 'ticket', 'nombre', 'cedula', 'empresa'];
         const missingFields = requiredFields.filter(id => !document.getElementById(id).value.trim());
 
         if (missingFields.length > 0) {
@@ -51,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const registro = {
             fecha: document.getElementById('fecha').value,
             serie: document.getElementById('serie').value,
+            ticket: document.getElementById('ticket').value,
             nombre: document.getElementById('nombre').value,
             cedula: document.getElementById('cedula').value,
             empresa: document.getElementById('empresa').value,
@@ -62,16 +61,15 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(12);
             doc.text(`Fecha de retiro: ${registro.fecha}`, 10, 20);
             doc.text(`Número de serie: ${registro.serie}`, 10, 30);
-            doc.text(`Nombre: ${registro.nombre}`, 10, 40);
-            doc.text(`Cédula: ${registro.cedula}`, 10, 50);
-            doc.text(`Empresa cliente: ${registro.empresa}`, 10, 60);
-            doc.text('Firma:', 10, 70);
-
-            doc.addImage(registro.url, 'PNG', 10, 75, 100, 40);
+            doc.text(`N° Ticket Interno: ${registro.ticket}`, 10, 40);
+            doc.text(`Nombre: ${registro.nombre}`, 10, 50);
+            doc.text(`Cédula: ${registro.cedula}`, 10, 60);
+            doc.text(`Empresa cliente: ${registro.empresa}`, 10, 70);
+            doc.text('Firma:', 10, 80);
+            doc.addImage(registro.url, 'PNG', 10, 85, 100, 40);
 
             await guardarRegistro(registro);
             doc.save(`registro_${registro.serie}.pdf`);
-
             form.reset();
             clearSignature();
             mostrarRegistros();
@@ -90,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             lista.innerHTML = registros.map((r, i) => `
                 <div class="registro-item">
                     <strong>${i + 1}.</strong> Fecha: ${r.fecha} | Serie: ${r.serie}<br>
-                    Nombre: ${r.nombre} | Cédula: ${r.cedula || 'N/A'} | Empresa: ${r.empresa}
+                    Ticket: ${r.ticket || 'N/A'} | Nombre: ${r.nombre} | Cédula: ${r.cedula || 'N/A'} | Empresa: ${r.empresa}
                 </div>
             `).join('');
         } catch (error) {

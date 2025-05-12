@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registro de Entrega de Activos</title>
-
-  <!-- Estilos -->
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
@@ -23,10 +21,12 @@
       <label for="serie">Número de Serie:</label>
       <input type="text" id="serie" required />
 
+      <label for="ticket">N° Ticket Interno Sabat:</label>
+      <input type="text" id="ticket" required />
+
       <label for="nombre">Nombre de quien retira:</label>
       <input type="text" id="nombre" required />
 
-      <!-- ✅ NUEVO CAMPO CÉDULA -->
       <label for="cedula">Cédula:</label>
       <input type="text" id="cedula" required />
 
@@ -51,9 +51,9 @@
     </div>
   </div>
 
-  <!-- ✅ Cargar scripts al final para asegurar orden correcto -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js"></script>
   <script src="/static/script.js"></script>
 </body>
 </html>
+

@@ -9,21 +9,19 @@ FRONTEND_PATH = os.getenv('FRONTEND_PATH', '../Frontend')
 def init_db():
     os.makedirs("data", exist_ok=True)
     with sqlite3.connect(DB_PATH) as conn:
-        # Agregar columna 'cedula' si no existe (para evitar borrar DB si ya hay datos)
         cursor = conn.execute("PRAGMA table_info(registros)")
         columns = [col[1] for col in cursor.fetchall()]
         if "cedula" not in columns:
-            try:
-                conn.execute("ALTER TABLE registros ADD COLUMN cedula TEXT")
-            except Exception:
-                pass  # Si falla porque no existe la tabla, se crea abajo
+            conn.execute("ALTER TABLE registros ADD COLUMN cedula TEXT")
+        if "ticket" not in columns:
+            conn.execute("ALTER TABLE registros ADD COLUMN ticket TEXT")
 
-        # Crear tabla si no existe
         conn.execute("""
             CREATE TABLE IF NOT EXISTS registros (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 fecha TEXT,
                 serie TEXT,
+                ticket TEXT,
                 nombre TEXT,
                 cedula TEXT,
                 empresa TEXT,
@@ -46,16 +44,17 @@ def serve_static(filename):
 def guardar_registro():
     try:
         data = request.get_json()
-        required_fields = ["fecha", "serie", "nombre", "cedula", "empresa", "url"]
+        required_fields = ["fecha", "serie", "ticket", "nombre", "cedula", "empresa", "url"]
         if not all(field in data for field in required_fields):
             return jsonify({"error": "Faltan campos requeridos"}), 400
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute("""
-                INSERT INTO registros (fecha, serie, nombre, cedula, empresa, url)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO registros (fecha, serie, ticket, nombre, cedula, empresa, url)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 data["fecha"],
                 data["serie"],
+                data["ticket"],
                 data["nombre"],
                 data["cedula"],
                 data["empresa"],
@@ -69,13 +68,13 @@ def guardar_registro():
 def obtener_registros():
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.execute("""
-            SELECT fecha, serie, nombre, cedula, empresa, url
+            SELECT fecha, serie, ticket, nombre, cedula, empresa, url
             FROM registros
             ORDER BY id DESC
             LIMIT 5
         """)
         registros = [
-            dict(zip(('fecha', 'serie', 'nombre', 'cedula', 'empresa', 'url'), row))
+            dict(zip(('fecha', 'serie', 'ticket', 'nombre', 'cedula', 'empresa', 'url'), row))
             for row in cursor.fetchall()
         ]
     return jsonify(registros)
