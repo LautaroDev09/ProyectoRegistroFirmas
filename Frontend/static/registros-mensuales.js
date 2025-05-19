@@ -17,11 +17,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const fecha = selector.value;
         if (!fecha) return alert('Seleccione un mes válido');
 
-        const response = await fetch(`/api/registros/mes?fecha=${fecha}`);
+        const response = await fetch(`/api/registros?mes=${fecha}`);
         const datos = await response.json();
 
         const filas = datos.map(r => [
-            r.fecha, r.serie, r.ticket, r.nombre, r.cedula, r.empresa
+            r.fecha,
+            r.serie,
+            r.ticket || 'N/A',
+            r.nombre,
+            r.cedula,
+            r.empresa
         ]);
 
         const encabezado = ["Fecha", "Serie", "Ticket", "Nombre", "Cédula", "Empresa"];
@@ -36,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const fecha = selector.value;
         if (!fecha) return;
 
-        const response = await fetch(`/api/registros/mes?fecha=${fecha}`);
+        const response = await fetch(`/api/registros?mes=${fecha}`);
         const registros = await response.json();
 
         cuerpoTabla.innerHTML = '';
@@ -53,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fila.innerHTML = `
                 <td>${r.fecha}</td>
                 <td>${r.serie}</td>
-                <td>${r.ticket}</td>
+                <td>${r.ticket || 'N/A'}</td>
                 <td>${r.nombre}</td>
                 <td>${r.cedula}</td>
                 <td>${r.empresa}</td>
