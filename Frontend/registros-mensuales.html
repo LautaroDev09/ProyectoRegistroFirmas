@@ -1,4 +1,3 @@
-<!-- registros-mensuales.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -73,17 +72,19 @@
 
         registros.forEach(r => {
           const fila = `<tr>
-            <td>${r.fecha}</td>
-            <td>${r.serie}</td>
-            <td>${r.ticket}</td>
-            <td>${r.nombre}</td>
-            <td>${r.cedula}</td>
-            <td>${r.empresa}</td>
+            <td>${r.fecha || 'N/A'}</td>
+            <td>${r.serie || 'N/A'}</td>
+            <td>${r.ticket || 'N/A'}</td>
+            <td>${r.nombre || 'N/A'}</td>
+            <td>${r.cedula || 'N/A'}</td>
+            <td>${r.empresa || 'N/A'}</td>
           </tr>`;
           tbody.innerHTML += fila;
         });
       } catch (error) {
         console.error('Error al buscar registros:', error);
+        const tbody = document.getElementById('tablaBody');
+        tbody.innerHTML = '<tr><td colspan="6">Error al cargar los datos.</td></tr>';
       }
     }
 
@@ -98,3 +99,4 @@
   </script>
 </body>
 </html>
+
