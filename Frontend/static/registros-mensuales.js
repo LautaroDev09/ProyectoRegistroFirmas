@@ -13,29 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
         cargarRegistros();
     });
 
-    botonDescargar.addEventListener('click', async () => {
-        const fecha = selector.value;
-        if (!fecha) return alert('Seleccione un mes válido');
-
-        const response = await fetch(`/api/registros?mes=${fecha}`);
-        const datos = await response.json();
-
-        const filas = datos.map(r => [
-            r.fecha,
-            r.serie,
-            r.ticket || 'N/A',
-            r.nombre,
-            r.cedula,
-            r.empresa
-        ]);
-
-        const encabezado = ["Fecha", "Serie", "Ticket", "Nombre", "Cédula", "Empresa"];
-        const wb = XLSX.utils.book_new();
-        const hoja = XLSX.utils.aoa_to_sheet([encabezado, ...filas]);
-        XLSX.utils.book_append_sheet(wb, hoja, "Registros");
-
-        XLSX.writeFile(wb, `registros_${fecha}.xlsx`);
-    });
+    botonDescargar.addEventListener('click', () => {
+    const fecha = selector.value;
+    if (!fecha) {
+        alert('Seleccione un mes válido');
+        return;
+    }
+    window.location.href = `/api/registros/excel?mes=${fecha}`;
+});
 
     async function cargarRegistros() {
         const fecha = selector.value;
