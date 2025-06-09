@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Ingreso de Equipos</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Registro de Ingreso de Equipos</h2>
+
+    <form id="formIngreso">
+      <label for="fecha">Fecha de Ingreso:</label>
+      <input type="date" id="fecha" required />
+
+      <label for="serie">Número de Serie:</label>
+      <input type="text" id="serie" required />
+
+      <label for="ticket">N° Ticket Interno Sabat:</label>
+      <input type="text" id="ticket" required />
+
+      <label for="empresa">Empresa Cliente:</label>
+      <input type="text" id="empresa" required />
+
+      <label for="tecnico">Nombre del Técnico:</label>
+      <input type="text" id="tecnico" required />
+
+      <label><input type="checkbox" id="replataformar" /> Re-plataformar</label>
+      <label><input type="checkbox" id="nuevo" /> Equipo nuevo</label>
+
+      <div class="error" id="errorMensaje" style="display: none;"></div>
+    </form>
+
+    <div class="button-group">
+      <button onclick="guardarIngreso()">Registrar</button>
+    </div>
+
+    <div id="respuestaServidor"></div>
+  </div>
+
+  <script>
+    async function guardarIngreso() {
+      const data = {
+        fecha: document.getElementById("fecha").value,
+        serie: document.getElementById("serie").value,
+        ticket: document.getElementById("ticket").value,
+        empresa: document.getElementById("empresa").value,
+        tecnico: document.getElementById("tecnico").value,
+        replataformar: document.getElementById("replataformar").checked,
+        nuevo: document.getElementById("nuevo").checked
+      };
+
+      // Validación básica
+      if (!data.fecha || !data.serie || !data.ticket || !data.empresa || !data.tecnico) {
+        mostrarError("Por favor complete todos los campos obligatorios.");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/ingresos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const resultado = await response.json();
+        if (!response.ok) throw new Error(resultado.error || "Error desconocido");
+
+        document.getElementById("respuestaServidor").innerText = "Ingreso registrado correctamente.";
+        document.getElementById("formIngreso").reset();
+        document.getElementById("errorMensaje").style.display = "none";
+      } catch (error) {
+        mostrarError("Error al registrar el ingreso: " + error.message);
+      }
+    }
+
+    function mostrarError(mensaje) {
+      const errorDiv = document.getElementById("errorMensaje");
+      errorDiv.innerText = mensaje;
+      errorDiv.style.display = "block";
+    }
+  </script>
+</body>
+</html>
