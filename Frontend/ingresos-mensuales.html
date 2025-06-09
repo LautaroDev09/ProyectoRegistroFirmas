@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta de Ingresos Mensuales</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    .filtros {
+      margin-bottom: 20px;
+    }
+    .tabla-registros {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .tabla-registros th, .tabla-registros td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    .tabla-registros th {
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Ingresos por Mes</h2>
+
+    <div class="filtros">
+      <label for="mes">Seleccionar Mes:</label>
+      <input type="month" id="mes" />
+      <button onclick="buscarIngresos()">Buscar</button>
+      <button onclick="descargarExcel()">Descargar Excel</button>
+    </div>
+
+    <div id="tablaContainer">
+      <table class="tabla-registros" id="tablaIngresos">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Serie</th>
+            <th>Ticket</th>
+            <th>Empresa</th>
+            <th>Técnico</th>
+            <th>Re-plataformar</th>
+            <th>Equipo Nuevo</th>
+          </tr>
+        </thead>
+        <tbody id="tablaBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    async function buscarIngresos() {
+      const mes = document.getElementById('mes').value;
+      if (!mes) {
+        alert('Por favor seleccione un mes.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/ingresos?mes=${mes}`);
+        const ingresos = await response.json();
+
+        const tbody = document.getElementById('tablaBody');
+        tbody.innerHTML = '';
+
+        if (ingresos.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7">No hay ingresos para este mes.</td></tr>';
+          return;
+        }
+
+        ingresos.forEach(i => {
+          const fila = `<tr>
+            <td>${i.fecha}</td>
+            <td>${i.serie}</td>
+            <td>${i.ticket}</td>
+            <td>${i.empresa}</td>
+            <td>${i.tecnico}</td>
+            <td>${i.replataformar ? 'Sí' : 'No'}</td>
+            <td>${i.nuevo ? 'Sí' : 'No'}</td>
+          </tr>`;
+          tbody.innerHTML += fila;
+        });
+      } catch (error) {
+        console.error('Error al buscar ingresos:', error);
+      }
+    }
+
+    function descargarExcel() {
+      const mes = document.getElementById('mes').value;
+      if (!mes) {
+        alert('Seleccione un mes para descargar.');
+        return;
+      }
+      window.location.href = `/api/ingresos/excel?mes=${mes}`;
+    }
+  </script>
+</body>
+</html>
