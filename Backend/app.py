@@ -12,6 +12,7 @@ FRONTEND_PATH = os.getenv('FRONTEND_PATH', '../Frontend')
 def init_db():
     os.makedirs("data", exist_ok=True)
     with sqlite3.connect(DB_PATH) as conn:
+        # Tabla para retiros
         conn.execute("""
             CREATE TABLE IF NOT EXISTS registros (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,6 +23,19 @@ def init_db():
                 cedula TEXT,
                 empresa TEXT,
                 url TEXT
+            )
+        """)
+        # Tabla para ingresos
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS ingresos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fecha TEXT,
+                serie TEXT,
+                ticket TEXT,
+                empresa TEXT,
+                tecnico TEXT,
+                re_plataformar INTEGER,
+                equipo_nuevo INTEGER
             )
         """)
 
@@ -35,6 +49,8 @@ def serve_index():
 @app.route("/<path:filename>")
 def serve_static(filename):
     return send_from_directory(FRONTEND_PATH, filename)
+
+# ----- Retiros -----
 
 @app.route("/api/registros", methods=["POST"])
 def guardar_registro():
@@ -73,7 +89,6 @@ def obtener_registros():
             params = [fecha_inicio.strftime("%Y-%m-%d"), fecha_fin.strftime("%Y-%m-%d")]
         except ValueError:
             return jsonify({"error": "Parámetro de mes inválido. Use formato YYYY-MM."}), 400
-
     query += " ORDER BY fecha DESC"
 
     with sqlite3.connect(DB_PATH) as conn:
@@ -89,26 +104,97 @@ def exportar_excel():
     mes_param = request.args.get("mes")
     if not mes_param:
         return jsonify({"error": "Parámetro 'mes' requerido (YYYY-MM)"}), 400
-
     try:
         fecha_inicio = datetime.strptime(mes_param, "%Y-%m")
         fecha_fin = datetime(fecha_inicio.year + int(fecha_inicio.month / 12), (fecha_inicio.month % 12) + 1, 1)
     except ValueError:
         return jsonify({"error": "Formato de mes inválido. Use YYYY-MM."}), 400
-
     with sqlite3.connect(DB_PATH) as conn:
         df = pd.read_sql_query("""
             SELECT fecha, serie, ticket, nombre, cedula, empresa FROM registros
             WHERE fecha >= ? AND fecha < ?
             ORDER BY fecha DESC
         """, conn, params=(fecha_inicio.strftime("%Y-%m-%d"), fecha_fin.strftime("%Y-%m-%d")))
-
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name="Registros")
     output.seek(0)
-
     filename = f"registros_{mes_param}.xlsx"
+    return send_file(output, as_attachment=True, download_name=filename, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+# ----- Ingresos -----
+
+@app.route("/api/ingresos", methods=["POST"])
+def guardar_ingreso():
+    try:
+        data = request.get_json()
+        required_fields = ["fecha", "serie", "ticket", "empresa", "tecnico", "re_plataformar", "equipo_nuevo"]
+        if not all(field in data for field in required_fields):
+            return jsonify({"error": "Faltan campos requeridos"}), 400
+        with sqlite3.connect(DB_PATH) as conn:
+            conn.execute("""
+                INSERT INTO ingresos (fecha, serie, ticket, empresa, tecnico, re_plataformar, equipo_nuevo)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                data["fecha"],
+                data["serie"],
+                data["ticket"],
+                data["empresa"],
+                data["tecnico"],
+                int(data["re_plataformar"]),
+                int(data["equipo_nuevo"])
+            ))
+        return jsonify({"mensaje": "Ingreso guardado correctamente"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/ingresos", methods=["GET"])
+def obtener_ingresos():
+    mes_param = request.args.get("mes")
+    query = "SELECT fecha, serie, ticket, empresa, tecnico, re_plataformar, equipo_nuevo FROM ingresos"
+    params = []
+    if mes_param:
+        try:
+            fecha_inicio = datetime.strptime(mes_param, "%Y-%m")
+            fecha_fin = datetime(fecha_inicio.year + int(fecha_inicio.month / 12), (fecha_inicio.month % 12) + 1, 1)
+            query += " WHERE fecha >= ? AND fecha < ?"
+            params = [fecha_inicio.strftime("%Y-%m-%d"), fecha_fin.strftime("%Y-%m-%d")]
+        except ValueError:
+            return jsonify({"error": "Parámetro de mes inválido. Use formato YYYY-MM."}), 400
+    query += " ORDER BY fecha DESC"
+
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.execute(query, params)
+        ingresos = [
+            dict(zip(('fecha', 'serie', 'ticket', 'empresa', 'tecnico', 're_plataformar', 'equipo_nuevo'), row))
+            for row in cursor.fetchall()
+        ]
+    return jsonify(ingresos)
+
+@app.route("/api/ingresos/excel", methods=["GET"])
+def exportar_ingresos_excel():
+    mes_param = request.args.get("mes")
+    if not mes_param:
+        return jsonify({"error": "Parámetro 'mes' requerido (YYYY-MM)"}), 400
+    try:
+        fecha_inicio = datetime.strptime(mes_param, "%Y-%m")
+        fecha_fin = datetime(fecha_inicio.year + int(fecha_inicio.month / 12), (fecha_inicio.month % 12) + 1, 1)
+    except ValueError:
+        return jsonify({"error": "Formato de mes inválido. Use YYYY-MM."}), 400
+    with sqlite3.connect(DB_PATH) as conn:
+        df = pd.read_sql_query("""
+            SELECT fecha, serie, ticket, empresa, tecnico,
+                   CASE re_plataformar WHEN 1 THEN 'Sí' ELSE 'No' END AS Re_plataformar,
+                   CASE equipo_nuevo WHEN 1 THEN 'Sí' ELSE 'No' END AS Equipo_nuevo
+            FROM ingresos
+            WHERE fecha >= ? AND fecha < ?
+            ORDER BY fecha DESC
+        """, conn, params=(fecha_inicio.strftime("%Y-%m-%d"), fecha_fin.strftime("%Y-%m-%d")))
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name="Ingresos")
+    output.seek(0)
+    filename = f"ingresos_{mes_param}.xlsx"
     return send_file(output, as_attachment=True, download_name=filename, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 if __name__ == "__main__":
