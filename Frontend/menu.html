@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menú Principal - Registro de Equipos</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    .panel {
+      max-width: 600px;
+      margin: 60px auto;
+      text-align: center;
+    }
+    .panel h1 {
+      margin-bottom: 30px;
+    }
+    .boton {
+      display: block;
+      margin: 15px auto;
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #3f51b5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 400px;
+    }
+    .boton:hover {
+      background-color: #303f9f;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Menú Principal</h1>
+    <button class="boton" onclick="location.href='main.html'">
+      ➤ Registro de Entrega de Activos
+    </button>
+    <button class="boton" onclick="location.href='registros-mensuales.html'">
+      ➤ Registros Mensuales de Entregas
+    </button>
+    <button class="boton" onclick="location.href='registro-ingreso.html'">
+      ➤ Registro de Ingreso de Equipos
+    </button>
+    <button class="boton" onclick="location.href='ingresos-mensuales.html'">
+      ➤ Registros Mensuales de Ingresos
+    </button>
+  </div>
+</body>
+</html>

@@ -39,10 +39,11 @@ def init_db():
             )
         """)
 
+# Página principal -> menú
 @app.route("/")
 def serve_index():
     try:
-        return send_from_directory(FRONTEND_PATH, 'main.html')
+        return send_from_directory(FRONTEND_PATH, 'menu.html')
     except FileNotFoundError:
         return "Frontend no encontrado. Por favor, construya el frontend.", 404
 
@@ -64,13 +65,8 @@ def guardar_registro():
                 INSERT INTO registros (fecha, serie, ticket, nombre, cedula, empresa, url)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
-                data["fecha"],
-                data["serie"],
-                data["ticket"],
-                data["nombre"],
-                data["cedula"],
-                data["empresa"],
-                data["url"]
+                data["fecha"], data["serie"], data["ticket"],
+                data["nombre"], data["cedula"], data["empresa"], data["url"]
             ))
         return jsonify({"mensaje": "Registro guardado correctamente"}), 201
     except Exception as e:
@@ -84,13 +80,13 @@ def obtener_registros():
     if mes_param:
         try:
             fecha_inicio = datetime.strptime(mes_param, "%Y-%m")
-            fecha_fin = datetime(fecha_inicio.year + int(fecha_inicio.month / 12), (fecha_inicio.month % 12) + 1, 1)
+            fecha_fin = datetime(fecha_inicio.year + int(fecha_inicio.month / 12),
+                                 (fecha_inicio.month % 12) + 1, 1)
             query += " WHERE fecha >= ? AND fecha < ?"
             params = [fecha_inicio.strftime("%Y-%m-%d"), fecha_fin.strftime("%Y-%m-%d")]
         except ValueError:
             return jsonify({"error": "Parámetro de mes inválido. Use formato YYYY-MM."}), 400
     query += " ORDER BY fecha DESC"
-
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.execute(query, params)
         registros = [
@@ -106,7 +102,8 @@ def exportar_excel():
         return jsonify({"error": "Parámetro 'mes' requerido (YYYY-MM)"}), 400
     try:
         fecha_inicio = datetime.strptime(mes_param, "%Y-%m")
-        fecha_fin = datetime(fecha_inicio.year + int(fecha_inicio.month / 12), (fecha_inicio.month % 12) + 1, 1)
+        fecha_fin = datetime(fecha_inicio.year + int(fecha_inicio.month / 12),
+                             (fecha_inicio.month % 12) + 1, 1)
     except ValueError:
         return jsonify({"error": "Formato de mes inválido. Use YYYY-MM."}), 400
     with sqlite3.connect(DB_PATH) as conn:
@@ -119,8 +116,9 @@ def exportar_excel():
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name="Registros")
     output.seek(0)
-    filename = f"registros_{mes_param}.xlsx"
-    return send_file(output, as_attachment=True, download_name=filename, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    return send_file(output, as_attachment=True,
+                     download_name=f"registros_{mes_param}.xlsx",
+                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 # ----- Ingresos -----
 
@@ -136,13 +134,8 @@ def guardar_ingreso():
                 INSERT INTO ingresos (fecha, serie, ticket, empresa, tecnico, re_plataformar, equipo_nuevo)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
-                data["fecha"],
-                data["serie"],
-                data["ticket"],
-                data["empresa"],
-                data["tecnico"],
-                int(data["re_plataformar"]),
-                int(data["equipo_nuevo"])
+                data["fecha"], data["serie"], data["ticket"], data["empresa"],
+                data["tecnico"], int(data["re_plataformar"]), int(data["equipo_nuevo"])
             ))
         return jsonify({"mensaje": "Ingreso guardado correctamente"}), 201
     except Exception as e:
@@ -156,13 +149,13 @@ def obtener_ingresos():
     if mes_param:
         try:
             fecha_inicio = datetime.strptime(mes_param, "%Y-%m")
-            fecha_fin = datetime(fecha_inicio.year + int(fecha_inicio.month / 12), (fecha_inicio.month % 12) + 1, 1)
+            fecha_fin = datetime(fecha_inicio.year + int(fecha_inicio.month / 12),
+                                 (fecha_inicio.month % 12) + 1, 1)
             query += " WHERE fecha >= ? AND fecha < ?"
             params = [fecha_inicio.strftime("%Y-%m-%d"), fecha_fin.strftime("%Y-%m-%d")]
         except ValueError:
             return jsonify({"error": "Parámetro de mes inválido. Use formato YYYY-MM."}), 400
     query += " ORDER BY fecha DESC"
-
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.execute(query, params)
         ingresos = [
@@ -178,7 +171,8 @@ def exportar_ingresos_excel():
         return jsonify({"error": "Parámetro 'mes' requerido (YYYY-MM)"}), 400
     try:
         fecha_inicio = datetime.strptime(mes_param, "%Y-%m")
-        fecha_fin = datetime(fecha_inicio.year + int(fecha_inicio.month / 12), (fecha_inicio.month % 12) + 1, 1)
+        fecha_fin = datetime(fecha_inicio.year + int(fecha_inicio.month / 12),
+                             (fecha_inicio.month % 12) + 1, 1)
     except ValueError:
         return jsonify({"error": "Formato de mes inválido. Use YYYY-MM."}), 400
     with sqlite3.connect(DB_PATH) as conn:
@@ -194,8 +188,9 @@ def exportar_ingresos_excel():
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name="Ingresos")
     output.seek(0)
-    filename = f"ingresos_{mes_param}.xlsx"
-    return send_file(output, as_attachment=True, download_name=filename, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    return send_file(output, as_attachment=True,
+                     download_name=f"ingresos_{mes_param}.xlsx",
+                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 if __name__ == "__main__":
     init_db()
