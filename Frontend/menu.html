@@ -3,50 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Menú Principal - Registro de Equipos</title>
+  <title>Menú Principal</title>
   <link rel="stylesheet" href="/static/style.css" />
   <style>
-    .panel {
-      max-width: 600px;
-      margin: 60px auto;
+    body {
+      font-family: Arial, sans-serif;
       text-align: center;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 0;
     }
-    .panel h1 {
+
+    .container {
+      padding: 40px 20px;
+    }
+
+    .logo {
+      max-width: 200px;
       margin-bottom: 30px;
     }
-    .boton {
-      display: block;
-      margin: 15px auto;
-      padding: 12px 20px;
-      font-size: 16px;
-      background-color: #3f51b5;
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .menu-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .menu-buttons button {
+      background-color: #b30000;
       color: white;
+      font-size: 18px;
+      padding: 14px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      width: 100%;
-      max-width: 400px;
+      transition: background-color 0.2s ease-in-out;
     }
-    .boton:hover {
-      background-color: #303f9f;
+
+    .menu-buttons button:hover {
+      background-color: #990000;
     }
   </style>
 </head>
 <body>
-  <div class="panel">
+  <div class="container">
+    <img src="/static/logo-sabat.png" alt="Logo Sabat" class="logo" />
     <h1>Menú Principal</h1>
-    <button class="boton" onclick="location.href='main.html'">
-      ➤ Registro de Entrega de Activos
-    </button>
-    <button class="boton" onclick="location.href='registros-mensuales.html'">
-      ➤ Registros Mensuales de Entregas
-    </button>
-    <button class="boton" onclick="location.href='registro-ingreso.html'">
-      ➤ Registro de Ingreso de Equipos
-    </button>
-    <button class="boton" onclick="location.href='ingresos-mensuales.html'">
-      ➤ Registros Mensuales de Ingresos
-    </button>
+    <div class="menu-buttons">
+      <button onclick="location.href='/main.html'">Registro de Retiros</button>
+      <button onclick="location.href='/registros-mensuales.html'">Retiros Mensuales</button>
+      <button onclick="location.href='/registro-ingreso.html'">Registro de Ingresos</button>
+      <button onclick="location.href='/ingresos-mensuales.html'">Ingresos Mensuales</button>
+    </div>
   </div>
 </body>
 </html>
